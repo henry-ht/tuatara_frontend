@@ -1,0 +1,115 @@
+<h1 class="h2 mb-5" >
+  Users
+</h1>
+<section class="row mt-5 justify-content-between" >
+  <div class="col-md-4 col-sm-6 mb-3">
+    <div class="input-group">
+      <input class="form-control" type="search" [(ngModel)]="textSearch" placeholder="filter by name"  aria-label="Search" (keyup)="onKeyUp()" >
+      <div class="input-group-append">
+        <button class="btn btn-info" (click)="orderBy = !orderBy;onKeyUp()">
+          {{orderBy ? 'ASC':'DES'}} <fa-icon class="ml-1" [icon]="faSort"></fa-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2 mb-3 text-md-right">
+    <button type="button" class="btn btn-primary" (click)="open(createEditForm);clearForm()" >
+      <fa-icon [icon]="faPlus"></fa-icon>
+    </button>
+  </div>
+</section>
+<section class="row">
+  <div class="col-md-12">
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">
+              Last update
+            </th>
+            <th scope="col" class="text-right">
+              Options
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="!users.data || loadPage" >
+            <td colspan="7">
+              <img src="assets/img/load/arrow.gif" alt="icono de carga" class="animated_animated animated_fadeIn img-fluid icon-load-max mx-auto d-block" >
+            </td>
+          </tr>
+          <tr *ngFor="let item of users['data'] | paginate: { itemsPerPage: users.per_page, currentPage: page, totalItems: users.total} " >
+            <th scope="row">
+              {{item.id}}
+            </th>
+            <td>
+              {{item.name}}
+            </td>
+            <td>
+              {{item.email}}
+            </td>
+            <td>
+              {{item.updated_at | date: 'fromNow'}}
+            </td>
+            <td class="text-right">
+              <div class="btn-group">
+                <button type="button" class="btn btn-light btn-sm" title="edit data" (click)="open(createEditForm);addToEdit(item)" [disabled]="loadPage" >
+                  <fa-icon [icon]="faEdit"></fa-icon>
+                </button>
+                <button type="button" class="btn btn-light btn-sm" (click)="disabled(item.id, item.disabled)" title="disabled and enabled" [disabled]="loadPage" >
+                  <fa-icon [icon]="faBan" *ngIf="!item.disabled" ></fa-icon>
+                  <fa-icon [icon]="faCheck" *ngIf="item.disabled" ></fa-icon>
+                </button>
+                <button type="button" class="btn btn-light btn-sm" title="edit data" (click)="delete(item.id)" [disabled]="loadPage" >
+                  <fa-icon [icon]="faTrash"></fa-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="w-100 w-md-50 ml-auto text-right">
+    <pagination-controls (pageChange)="pageChange($event)"></pagination-controls>
+  </div>
+</section>
+
+
+<ng-template #createEditForm let-modal >
+  <div class="modal-header">
+    <h4 class="modal-title" >
+      Create or update
+    </h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form (ngSubmit)="onSubmit()" [formGroup]="editCreatedForm" name="shopForm" >
+      <div class="form-group mb-3">
+        <label for="name">Name <span class="text-danger">*</span> </label>
+        <input type="text" [ngClass]="{ 'is-invalid': isValid().name.dirty && isValid().name.errors }" class="form-control" id="name" [readonly]="loadPage" formControlName="name"  >
+        <small *ngIf="isValid().name.errors && isValid().name.dirty"  class="form-text text-muted">
+          Campo requerido
+        </small>
+      </div>
+
+      <div class="form-group mb-3">
+        <label for="email">Email <span class="text-danger">*</span> </label>
+        <input type="email" [ngClass]="{ 'is-invalid': isValid().email.dirty && isValid().email.errors }" id="email" class="form-control" [readonly]="loadPage" formControlName="email"  >
+        <small *ngIf="isValid().email.errors && isValid().email.dirty" class="form-text text-muted">
+          Campo requerido
+        </small>
+      </div>
+      <div class="w-100 text-right">
+        <button type="submit" class="btn btn-outline-dark" [disabled]="this.editCreatedForm.invalid || loadPage" >
+          <fa-icon [icon]="faPaperPlane" class="ml-1"></fa-icon> Save
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
